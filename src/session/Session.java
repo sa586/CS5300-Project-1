@@ -35,7 +35,7 @@ public class Session {
    public void updateTimestamp() {
       this.timestamp = new Date();
    }
-
+   //Gets timestamp of session in seconds since epoch
    public long getTimestamp() {
       return timestamp.getTime()/1000;
    }
@@ -43,7 +43,7 @@ public class Session {
    public void setLocations(ArrayList<Integer> locations) {
       this.locations = locations;
    }
-
+   //Returns locations as a string of integers joined by ","
    public String getLocations() {
       StringBuilder buffer = new StringBuilder();
       Iterator<Integer> iter = locations.iterator();
@@ -60,11 +60,11 @@ public class Session {
    public void incrementVersion() {
       this.version++;
    }
-
+   //Set session data
    public void setData(String key, Object value) {
       this.data.put(key, value);
    }
-
+   //Get session data
    public Object getData(String key) {
       return this.data.get(key);
    }

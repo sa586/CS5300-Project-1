@@ -16,16 +16,21 @@ import com.google.gson.*;
 
 
 public class SessionManager {
+   protected static final String cookieName = "CS5300SESSION";
+   protected static final Integer sessionTimeout = 60; //Timeout time in seconds of session
+   protected static final Integer sessionCleanerFrequency = 2; //Delay in seconds for running cleaner
+   
    protected static final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
    protected static final Lock readlock = rwl.readLock();
    protected static final Lock writelock = rwl.writeLock();
    protected static final Hashtable<String, Session> sessions = new Hashtable<String, Session>();
-   protected static final String cookieName = "CS5300SESSION";
-   protected static final Integer sessionTimeout = 60;
-   protected static final Integer sessionCleanerFrequency = 1;
+   
    protected static final SessionCleaner sessionCleaner = new SessionCleaner();
    protected static final Timer sessionCleanerTimer = new Timer();
    
+   //Retrieve a session from the table or create one
+   //Increment the version of the session
+   //Save this back as a cookie
    public static Session getAndIncrement(HttpServletRequest request, HttpServletResponse response) {
       Cookie[] cookies = request.getCookies();
       Cookie cookie = null;
@@ -53,6 +58,8 @@ public class SessionManager {
       }
    }
    
+   //Destroy a session
+   //Expire the cookie and delete from table
    public static void destroy(HttpServletRequest request, HttpServletResponse response, Session session) {
       Cookie[] cookies = request.getCookies();
       Cookie cookie = null;
@@ -76,12 +83,15 @@ public class SessionManager {
          writelock.unlock();
       }
    }
+   //Start the Session table cleaner
    public static void startCleaner() {
       sessionCleanerTimer.schedule(sessionCleaner, sessionCleanerFrequency*1000, sessionCleanerFrequency*1000);
    }
+   //Clean up loose threads
    public static void cleanup() {
       sessionCleanerTimer.cancel();
    }
+   
    //Create a new session and add cookie for session
    private static Session initialize(HttpServletResponse response) {
       String uuid = UUID.randomUUID().toString();

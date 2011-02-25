@@ -37,9 +37,11 @@ public class Assign3 extends HttpServlet {
 	   PrintWriter out = response.getWriter();
 	   String message = (String)session.getData("message");
 	   Integer count = (Integer)session.getData("count");
+	   //Initialize message
 	   if(message == null) {
 	      message = "Hello World!";
 	   }
+	   //Initialize count or increment
 	   if(count == null) {
 	      count = 1;
 	   } else {
@@ -52,7 +54,10 @@ public class Assign3 extends HttpServlet {
    	      count = 1;
 	      } else if(cmd.equals("LogOut")) {
 	         SessionManager.destroy(request, response, session);
+	         out.println("<!DOCTYPE html>");
+	         out.println("<html><head></head><body>");
 	         out.println("<h2>Bye!</h2>");
+	         out.println("</body></html>");
 	         return;
 	      }
 	   }
@@ -74,6 +79,7 @@ public class Assign3 extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	//Simply refer to doGet
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	   doGet(request,response);
 	}
