@@ -9,4 +9,14 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
+  <servlet>
+    <description></description>
+    <display-name>Assign3</display-name>
+    <servlet-name>Assign3</servlet-name>
+    <servlet-class>Assign3</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Assign3</servlet-name>
+    <url-pattern>/Assign3</url-pattern>
+  </servlet-mapping>
 </web-app>
