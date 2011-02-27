@@ -74,8 +74,8 @@ public class Assign3 extends HttpServlet {
 	   out.println("<div><input type=\"submit\" value=\"Refresh\" name=\"cmd\" /></div>");
 	   out.println("<div><input type=\"submit\" value=\"LogOut\" name=\"cmd\" /></div>");
 	   out.println("</form>");
-	   out.println("<h3>SessionID: "+session.getSessionID()+"</h3>");
-	   out.println("<h3>Version: "+session.getVersion()+"</h3>");
+	   //out.println("<h3>SessionID: "+session.getSessionID()+"</h3>");
+	   //out.println("<h3>Version: "+session.getVersion()+"</h3>");
 	   out.println("</body></html>");
 	}
 

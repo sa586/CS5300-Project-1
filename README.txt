@@ -22,4 +22,4 @@ SessionCleaner iterates through the session table and checks the timestamp on th
 
 ==How To Run
 It is easy to run the project from Eclipse if Tomcat is installed and configured. The default URL set is http://localhost/CS5300/Assign3
-As a .war file, the project can be deployed to a web server or platform such as Amazon's Elastic Beanstalk. Simply update the provided CS5300.war file onto the service and run it.
+As a .war file, the project can be deployed to a web server or platform such as Amazon's Elastic Beanstalk. Simply update the provided CS5300.war file onto the service and run it. Doing so will deploy the application to http://yoururl/Assign3
