@@ -23,7 +23,10 @@ public class Assign3 extends HttpServlet {
        super();
        SessionManager.startCleaner();
    }
-    
+   /**
+    * Called when server is shutdown/restarted/reloaded
+    * Ensure that loose threads are removed
+    */
    public void destroy() {
       SessionManager.cleanup();
    }
@@ -78,8 +81,8 @@ public class Assign3 extends HttpServlet {
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 * Simply refer to doGet
 	 */
-	//Simply refer to doGet
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	   doGet(request,response);
 	}

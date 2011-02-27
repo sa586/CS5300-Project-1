@@ -5,7 +5,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.TimerTask;
 
-   
+/**
+ * Session cleaner
+ * Checks for any timed-out sessions in table and deletes them
+ * @author Harrison
+ *
+ */
 public class SessionCleaner extends TimerTask {
    //Compare the time of each entry in Session table with the time now
    //If the difference is greater than SessionManager.sessionTimeout, remove the session

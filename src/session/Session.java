@@ -5,6 +5,11 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+/**
+ * A session
+ * @author Harrison
+ *
+ */
 public class Session {
    private String sessionID;
    private Integer version;

@@ -14,23 +14,32 @@ import javax.servlet.http.*;
 
 import com.google.gson.*;
 
-
+/**
+ * Manages sessions in a threadsafe table
+ * @author Harrison
+ *
+ */
 public class SessionManager {
    protected static final String cookieName = "CS5300SESSION";
    protected static final Integer sessionTimeout = 60; //Timeout time in seconds of session
-   protected static final Integer sessionCleanerFrequency = 2; //Delay in seconds for running cleaner
+   protected static final Integer sessionCleanerFrequency = 5; //Delay in seconds for running cleaner
    
+   //Locks for session table
    protected static final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
    protected static final Lock readlock = rwl.readLock();
    protected static final Lock writelock = rwl.writeLock();
    protected static final Hashtable<String, Session> sessions = new Hashtable<String, Session>();
    
+   //Sweeper for session cleanup
    protected static final SessionCleaner sessionCleaner = new SessionCleaner();
    protected static final Timer sessionCleanerTimer = new Timer();
    
-   //Retrieve a session from the table or create one
-   //Increment the version of the session
-   //Save this back as a cookie
+   
+   /**
+    * Retrieve a session from the table or create one
+    * Increment the version of the session
+    * Save this back as a cookie
+    */
    public static Session getAndIncrement(HttpServletRequest request, HttpServletResponse response) {
       Cookie[] cookies = request.getCookies();
       Cookie cookie = null;
@@ -58,8 +67,10 @@ public class SessionManager {
       }
    }
    
-   //Destroy a session
-   //Expire the cookie and delete from table
+   /**
+    * Destroy a session
+    * Expire the cookie and delete session from table
+    */
    public static void destroy(HttpServletRequest request, HttpServletResponse response, Session session) {
       Cookie[] cookies = request.getCookies();
       Cookie cookie = null;
@@ -83,16 +94,23 @@ public class SessionManager {
          writelock.unlock();
       }
    }
-   //Start the Session table cleaner
+   /**
+    * Start session cleaner
+    */
    public static void startCleaner() {
       sessionCleanerTimer.schedule(sessionCleaner, sessionCleanerFrequency*1000, sessionCleanerFrequency*1000);
    }
-   //Clean up loose threads
+   /**
+    * Cleanup loose threads
+    * Call this when stopping sessions
+    */
    public static void cleanup() {
       sessionCleanerTimer.cancel();
    }
    
-   //Create a new session and add cookie for session
+   /**
+    * Create a new session and add cookie for session
+    */
    private static Session initialize(HttpServletResponse response) {
       String uuid = UUID.randomUUID().toString();
       Session s = new Session(uuid, new ArrayList<Integer>(1));
@@ -107,7 +125,9 @@ public class SessionManager {
       response.addCookie(c);
       return s;
    }
-   //Create a cookie string
+   /**
+    * Create a cookie string
+    */
    private static String makeCookie(Session s) {
       Gson gson = new Gson();
       String[] cookie_params = {s.getSessionID(), s.getVersion(), s.getLocations()};
@@ -118,8 +138,10 @@ public class SessionManager {
       }
       return null;
    }
-   //Find session from a given cookie string
-   //Returns null if unable to be found or version numbers are incorrect
+   /**
+    * Find session from a given cookie string
+    * Returns null if unable to be found or version numbers are incorrect
+    */
    private static Session getSessionFromCookie(String cookie) {
       Gson gson = new Gson();
       String[] cookie_params;
@@ -149,6 +171,6 @@ public class SessionManager {
          e.printStackTrace();
       }
       return null;
-
    }
+   
 }
