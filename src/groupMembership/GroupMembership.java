@@ -2,71 +2,85 @@ package groupMembership;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import rpc.RPC;
+import rpc.RPCClient;
 
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.simpledb.AmazonSimpleDB;
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
-import com.amazonaws.services.simpledb.model.Attribute;
 import com.amazonaws.services.simpledb.model.DeleteAttributesRequest;
 import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.PutAttributesRequest;
 import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 
-public class GroupMembership {
+public class GroupMembership extends Thread {
    public static final int checkRate = 10;
    public static final String simpleDBDomain = "Project1";
    AmazonSimpleDB sdb;
-   String ip;
-   String port;
+   Server current;
    Random r = new Random();
-   public GroupMembership(String iparg, String portarg) throws IOException {
-      ip = iparg;
-      port = portarg;
+   List<Server> servers = new ArrayList<Server>();
+   
+   public GroupMembership(Server s) throws IOException {
+      current = s;
       sdb = new AmazonSimpleDBClient(new PropertiesCredentials(
                GroupMembership.class.getResourceAsStream("AwsCredentials.properties")));
       checkRound();
    }
    
+   public void run() {
+      //Check every 0.5*checkRate to 1.5*checkRate
+      while(true) {
+         try {
+            Thread.sleep((int)((r.nextDouble() + 0.5) * checkRate * 1000));
+            checkRound();
+         } catch (InterruptedException e) {
+            e.printStackTrace();
+         }
+      }
+   }
+   
    private boolean checkRound() {
+      System.out.println("Start "+current);
+      
       //Add to SimpleDB
       addMembership();
       
-      //Probe random server in SimpleDB
+      //Build list of servers
       SelectRequest selectRequest = new SelectRequest("select * from "+simpleDBDomain);
-      List<Item> items = sdb.select(selectRequest).getItems();
-      int i = r.nextInt(items.size());
-      Item item = items.get(i);
-      System.out.println("    Name: " + item.getName());
-      String remoteip = null;
-      String remoteport = null;
-      for (Attribute attribute : item.getAttributes()) {
-         System.out.println("      Attribute");
-         System.out.println("        Name:  " + attribute.getName());
-         System.out.println("        Value: " + attribute.getValue());
-         if(attribute.getName().equals("ip")) {
-            remoteip = attribute.getValue();
-         } else if (attribute.getName().equals("port")) {
-            remoteport = attribute.getValue();
-         } 
+      List<Server> ss = new ArrayList<Server>();
+      for (Item item : sdb.select(selectRequest).getItems()) {
+         ss.add(new Server(item.getName()));
       }
-      if(remoteip != null && remoteport != null) {
-         probe(remoteip,remoteport);
+      
+      if(ss.size() > 0) {
+         //Probe random server and remove if inactive
+         int i = r.nextInt(ss.size());
+         Server s = ss.get(i);
+         System.out.println("Checking " + s);
+         if(!current.equals(s)) {
+            if(!probe(s)) {
+               ss.remove(i);
+            }
+         }
+         //Replace servers with new list
+         Collections.shuffle(ss,r);
+         servers = ss;
       }
-
+      
       System.out.println("End");
       return true;
    }
    
    private boolean addMembership() {
       List<ReplaceableAttribute> replaceableAttributes = new ArrayList<ReplaceableAttribute>();
-      replaceableAttributes.add(new ReplaceableAttribute("ip", ip, true));
-      replaceableAttributes.add(new ReplaceableAttribute("port", port, true));
-      sdb.putAttributes(new PutAttributesRequest(simpleDBDomain,ip+":"+port,replaceableAttributes));
+      replaceableAttributes.add(new ReplaceableAttribute("ip", current.ip, true));
+      replaceableAttributes.add(new ReplaceableAttribute("port", current.port, true));
+      sdb.putAttributes(new PutAttributesRequest(simpleDBDomain,current.toString(),replaceableAttributes));
       return true;
    }
    
@@ -75,13 +89,14 @@ public class GroupMembership {
     * If the server does not respond, remove it from SimpleDB.
     * @return
     */
-   private boolean probe(String remoteip, String remoteport) {
-      if (RPC.probe(remoteip, remoteport)) {
-         System.out.println(ip+":"+port+" Active");
+   private boolean probe(Server s) {
+      if (RPCClient.probe(s.ip, s.port)) {
+         System.out.println(s+" Active");
          return true;
       } else {
-         System.out.println(ip+":"+port+" Inactive");
-         sdb.deleteAttributes(new DeleteAttributesRequest(simpleDBDomain, remoteip+":"+remoteport));
+         System.out.println(s+" Inactive");
+         sdb.deleteAttributes(new DeleteAttributesRequest(simpleDBDomain, s.toString()));
+         System.out.println(s+" Removed");
          return false;
       }
    }
