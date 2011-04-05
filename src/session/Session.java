@@ -1,5 +1,8 @@
 package session;
 
+import groupMembership.Server;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -10,14 +13,18 @@ import java.util.Iterator;
  * @author Harrison
  *
  */
-public class Session {
+public class Session implements Serializable {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 4376448148045677097L;
    private String sessionID;
    private Integer version;
    private Date timestamp;
-   private ArrayList<Integer> locations;
+   private ArrayList<Server> locations;
    private Hashtable<String, Object> data;
    
-   public Session(String sessionID, ArrayList<Integer> location) {
+   public Session(String sessionID, ArrayList<Server> location) {
       this.setSessionID(sessionID);
       this.setLocations(location);
       this.version = 0;
@@ -45,13 +52,16 @@ public class Session {
       return timestamp.getTime()/1000;
    }
 
-   public void setLocations(ArrayList<Integer> locations) {
+   public void setLocations(ArrayList<Server> locations) {
       this.locations = locations;
    }
+   public ArrayList<Server> getLocations() {
+      return locations;
+   }
    //Returns locations as a string of integers joined by ","
-   public String getLocations() {
+   public String getLocationsString() {
       StringBuilder buffer = new StringBuilder();
-      Iterator<Integer> iter = locations.iterator();
+      Iterator<Server> iter = locations.iterator();
       if (iter.hasNext()) {
          buffer.append(iter.next());
          while (iter.hasNext()) {
@@ -73,4 +83,5 @@ public class Session {
    public Object getData(String key) {
       return this.data.get(key);
    }
+   
 }

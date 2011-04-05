@@ -1,5 +1,7 @@
 package session;
 
+import groupMembership.Server;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -113,7 +115,9 @@ public class SessionManager {
     */
    private static Session initialize(HttpServletResponse response) {
       String uuid = UUID.randomUUID().toString();
-      Session s = new Session(uuid, new ArrayList<Integer>(1));
+      ArrayList<Server> servers = new ArrayList<Server>();
+      servers.add(new Server());
+      Session s = new Session(uuid, servers);
       writelock.lock();
       try {
          sessions.put(uuid, s);
@@ -130,7 +134,7 @@ public class SessionManager {
     */
    private static String makeCookie(Session s) {
       Gson gson = new Gson();
-      String[] cookie_params = {s.getSessionID(), s.getVersion(), s.getLocations()};
+      String[] cookie_params = {s.getSessionID(), s.getVersion(), s.getLocationsString()};
       try {
          return URLEncoder.encode(gson.toJson(cookie_params),"UTF-8");
       } catch (UnsupportedEncodingException e) {

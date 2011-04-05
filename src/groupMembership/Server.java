@@ -1,18 +1,44 @@
 package groupMembership;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 public class Server {
-   String ip;
-   String port;
+   public InetAddress ip;
+   public Integer port;
+   
+   /**
+    * Dummy constructor
+    */
+   public Server() {
+      try {
+         ip = InetAddress.getByName("127.0.0.1");
+      } catch (UnknownHostException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      port = 0;
+   }
    
    public Server(String sip, String sport) {
-      ip = sip;
-      port = sport;
+      try {
+         ip = InetAddress.getByName(sip);
+      } catch (UnknownHostException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      port = new Integer(sport);
    }
    
    public Server(String ipAndPort) {
       String[] parts = ipAndPort.split(":");
-      ip = parts[0];
-      port = parts[1];
+      try {
+         ip = InetAddress.getByName(parts[0]);
+      } catch (UnknownHostException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      port = new Integer(parts[1]);
    }
    
    public String toString() {
