@@ -33,18 +33,18 @@ public class Project1 extends HttpServlet {
     rpcServer = new RPCServer();
     new Thread(rpcServer).start();
 
-    // Get IP and Port of RPCServer
+
     try {
+      // Get IP and Port of RPCServer
       localServer = new Server(InetAddress.getLocalHost(), rpcServer.getPort());
+
+      // Start GroupMembership service
+      System.out.println("Kinda happy");
+      gm = new GroupMembership(localServer);
+      new Thread(gm).start();
     } catch (UnknownHostException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-
-    // Start GroupMembership service
-    try {
-      gm = new GroupMembership(localServer);
-      new Thread(gm).start();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

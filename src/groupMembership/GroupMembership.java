@@ -18,7 +18,7 @@ import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 
 public class GroupMembership extends Thread {
-   public static final int checkRate = 10;
+   public static final int checkRate = 10; // Approximate number of seconds between membership checks
    public static final String simpleDBDomain = "Project1";
    
    boolean setFalseToStop = true;
@@ -30,8 +30,10 @@ public class GroupMembership extends Thread {
    
    public GroupMembership(Server s) throws IOException {
       current = s;
+      System.out.println("Happy");
       sdb = new AmazonSimpleDBClient(new PropertiesCredentials(
                GroupMembership.class.getResourceAsStream("AwsCredentials.properties")));
+      System.out.println("Sad");
       checkRound();
    }
    
