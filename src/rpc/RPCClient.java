@@ -5,7 +5,6 @@ import groupMembership.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.List;
 import java.util.UUID;
@@ -26,18 +25,20 @@ public class RPCClient {
     * Return true if probe succeeded, false otherwise
     * @return
     */
-   public static boolean probe(String ip, String port) {
-      System.out.println("Probing "+ip+":"+port);
+   public static boolean probe(Server s) {
+      System.out.println("Probing "+s);
       DatagramSocket rpcSocket;
       try {
         rpcSocket = new DatagramSocket();
+        rpcSocket.setSoTimeout(1000); //Timeout after 1 second
         String callID = UUID.randomUUID().toString();
         byte[] outBuf = new byte[4096];
         outBuf = (callID + ",0,,").getBytes();
         DatagramPacket sendPkt;
         try {
-          sendPkt = new DatagramPacket(outBuf, outBuf.length, InetAddress.getByName(ip), Integer.valueOf(port));
+          sendPkt = new DatagramPacket(outBuf, outBuf.length, s.ip, s.port);
           rpcSocket.send(sendPkt);
+          System.out.println("Sent packet: "+outBuf);
         } catch (IOException e1) {
            // TODO Auto-generated catch block
            e1.printStackTrace();
@@ -50,13 +51,15 @@ public class RPCClient {
              rpcSocket.receive(recvPkt);
           } while(!(new String(recvPkt.getData())).split(",")[0].equals(callID));
         } catch (IOException e1) {
-          recvPkt = null;
+           recvPkt = null;
+           return false;
         }
       } catch (SocketException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
         return false;
       }
+      System.out.println(s+" Online");
       return true;
    }
    

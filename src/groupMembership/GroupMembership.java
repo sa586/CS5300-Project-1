@@ -62,11 +62,11 @@ public class GroupMembership extends Thread {
          int i = r.nextInt(ss.size());
          Server s = ss.get(i);
          System.out.println("Checking " + s);
-         if(!current.equals(s)) {
+         //if(!current.equals(s)) {
             if(!probe(s)) {
                ss.remove(i);
             }
-         }
+         //}
          //Replace servers with new list
          Collections.shuffle(ss,r);
          servers = ss;
@@ -90,7 +90,7 @@ public class GroupMembership extends Thread {
     * @return
     */
    private boolean probe(Server s) {
-      if (RPCClient.probe(s.ip.getHostAddress(), s.port.toString())) {
+      if (RPCClient.probe(s)) {
          System.out.println(s+" Active");
          return true;
       } else {

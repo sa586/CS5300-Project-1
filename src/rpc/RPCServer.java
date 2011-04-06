@@ -46,6 +46,7 @@ public class RPCServer extends Thread {
    }
    
    private byte[] computeResponse(byte[] data, int length) {
+      System.out.println("Server got data: "+data.toString());
       //read data
       Session retrievedSession;
       byte[] returnVal = null;
