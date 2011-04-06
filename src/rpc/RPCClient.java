@@ -154,14 +154,14 @@ public class RPCClient {
     * Send call to several destinations, and return the first NQ responses
     * @return
     */
-   public static Session put(Session s, List<Server> servers) {
+   public static Session put(Session s) {
       try {
          DatagramSocket rpcSocket = new DatagramSocket();
          String callID = UUID.randomUUID().toString();
          String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion() + "," + s.getData("count") + "," + s.getData("message"));
          byte[] outBuf = RPCClient.marshal(outstr);
 
-         for(Server e : servers) {
+         for(Server e : s.getLocations()) {
             DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, e.ip, e.port);
             try {
                rpcSocket.send(sendPkt);

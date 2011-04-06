@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A session
@@ -21,12 +22,12 @@ public class Session implements Serializable {
    private String sessionID;
    private Integer version;
    private Date timestamp;
-   private ArrayList<Server> locations;
+   private List<Server> locations;
    private Hashtable<String, String> data;
    
-   public Session(String sessionID, ArrayList<Server> location) {
+   public Session(String sessionID, List<Server> list) {
       this.setSessionID(sessionID);
-      this.setLocations(location);
+      this.setLocations(list);
       this.version = 0;
       this.timestamp = new Date();
       this.data = new Hashtable<String, String>();
@@ -56,10 +57,10 @@ public class Session implements Serializable {
       return timestamp.getTime()/1000;
    }
 
-   public void setLocations(ArrayList<Server> locations) {
-      this.locations = locations;
+   public void setLocations(List<Server> list) {
+      this.locations = list;
    }
-   public ArrayList<Server> getLocations() {
+   public List<Server> getLocations() {
       return locations;
    }
    //Returns locations as a string of integers joined by ","

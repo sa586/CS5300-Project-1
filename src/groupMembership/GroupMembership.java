@@ -26,7 +26,7 @@ public class GroupMembership extends Thread {
    AmazonSimpleDB sdb;
    Server current;
    Random r = new Random();
-   List<Server> servers = new ArrayList<Server>();
+   public static List<Server> servers = new ArrayList<Server>();
    
    public GroupMembership(Server s) throws IOException {
       current = s;
@@ -108,7 +108,7 @@ public class GroupMembership extends Thread {
       }
    }
 
-   public List<Server> getServers(){
-      return this.servers;
+   public static List<Server> getServers(){
+      return servers;
    }
 }

@@ -49,11 +49,15 @@ public class Project1 extends HttpServlet {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    
+    // Start session cleaner
+    SessionManager.startCleaner();
   }
 
   public void destroy() {
     rpcServer.cleanup();
     gm.cleanup();
+    SessionManager.cleanup();
   }
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
