@@ -20,6 +20,9 @@ import com.amazonaws.services.simpledb.model.SelectRequest;
 public class GroupMembership extends Thread {
    public static final int checkRate = 10;
    public static final String simpleDBDomain = "Project1";
+   
+   boolean setFalseToStop = true;
+   
    AmazonSimpleDB sdb;
    Server current;
    Random r = new Random();
@@ -34,7 +37,7 @@ public class GroupMembership extends Thread {
    
    public void run() {
       //Check every 0.5*checkRate to 1.5*checkRate
-      while(true) {
+      while(setFalseToStop) {
          try {
             Thread.sleep((int)((r.nextDouble() + 0.5) * checkRate * 1000));
             checkRound();
@@ -42,6 +45,10 @@ public class GroupMembership extends Thread {
             e.printStackTrace();
          }
       }
+   }
+   
+   public void cleanup() {
+     setFalseToStop = false;
    }
    
    private boolean checkRound() {

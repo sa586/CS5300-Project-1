@@ -20,6 +20,11 @@ public class Server {
       port = 0;
    }
    
+   public Server(InetAddress sip, int sport) {
+     ip = sip;
+     port = sport;
+   }
+   
    public Server(String sip, String sport) {
       try {
          ip = InetAddress.getByName(sip);

@@ -9,8 +9,11 @@ import session.Session;
 import session.SessionManager;
 
 public class RPCServer extends Thread {
-   DatagramSocket rpcSocket;
-   int serverPort;
+  boolean setFalseToStop = true;
+  
+  DatagramSocket rpcSocket;
+  int serverPort;
+   
    public RPCServer() {
       try {
          rpcSocket = new DatagramSocket();
@@ -26,7 +29,7 @@ public class RPCServer extends Thread {
    }
    
    public void run() {
-      while(true) {
+      while(setFalseToStop) {
          byte[] inBuf = new byte[4096];
          DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
          try {
@@ -45,6 +48,9 @@ public class RPCServer extends Thread {
       }
    }
    
+   public void cleanup() {
+     setFalseToStop = false;
+   }
    
    private byte[] computeResponse(byte[] data, int length) {
       //read data

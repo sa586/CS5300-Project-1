@@ -1,4 +1,8 @@
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import javax.servlet.http.HttpServlet;
 
 import rpc.RPCServer;
 
@@ -6,23 +10,42 @@ import groupMembership.GroupMembership;
 import groupMembership.Server;
 
 
-public class Project1 {
+public class Project1 extends HttpServlet {
+  private static final long serialVersionUID = 8815322823956211829L;
+  private RPCServer rpcServer;
+  private Server localServer;
+  private GroupMembership gm;
 
-   /**
+  /**
     * @param args
     * @throws Exception 
     */
-   public static void main(String[] args) throws Exception {
+   public Project1() {
       //Startup server
-      RPCServer server = new RPCServer();
-      new Thread(server).start();
+      rpcServer = new RPCServer();
+      new Thread(rpcServer).start();
       
-      String serverIP = InetAddress.getLocalHost().getHostAddress();
-      String serverPort = Integer.toString(server.getPort());
+      //Get IP and Port of RPCServer
+      try {
+        localServer = new Server(InetAddress.getLocalHost(),rpcServer.getPort());
+      } catch (UnknownHostException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       
-      GroupMembership gm = new GroupMembership(new Server(serverIP, serverPort));
-      new Thread(gm).start();
-
+      //Start GroupMembership service
+      
+      try {
+        gm = new GroupMembership(localServer);
+        new Thread(gm).start();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+   }
+   public void destroy() {
+     rpcServer.cleanup();
+     gm.cleanup();
    }
 
 }
