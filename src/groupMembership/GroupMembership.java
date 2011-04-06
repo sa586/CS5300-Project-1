@@ -100,4 +100,8 @@ public class GroupMembership extends Thread {
          return false;
       }
    }
+
+   public List<Server> getServers(){
+      return this.servers;
+   }
 }
