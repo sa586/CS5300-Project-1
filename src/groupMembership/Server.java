@@ -34,15 +34,15 @@ public class Server {
       String[] parts = ipAndPort.split(":");
       try {
          ip = InetAddress.getByName(parts[0]);
+         port = new Integer(parts[1]);
       } catch (UnknownHostException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      port = new Integer(parts[1]);
    }
    
    public String toString() {
-      return ip+":"+port;
+      return ip.getHostAddress()+":"+port;
    }
    
    public boolean equals(Server s2) {

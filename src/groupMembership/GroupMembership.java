@@ -78,7 +78,7 @@ public class GroupMembership extends Thread {
    
    private boolean addMembership() {
       List<ReplaceableAttribute> replaceableAttributes = new ArrayList<ReplaceableAttribute>();
-      replaceableAttributes.add(new ReplaceableAttribute("ip", current.ip.toString(), true));
+      replaceableAttributes.add(new ReplaceableAttribute("ip", current.ip.getHostAddress(), true));
       replaceableAttributes.add(new ReplaceableAttribute("port", current.port.toString(), true));
       sdb.putAttributes(new PutAttributesRequest(simpleDBDomain,current.toString(),replaceableAttributes));
       return true;
@@ -90,7 +90,7 @@ public class GroupMembership extends Thread {
     * @return
     */
    private boolean probe(Server s) {
-      if (RPCClient.probe(s.ip.toString(), s.port.toString())) {
+      if (RPCClient.probe(s.ip.getHostAddress(), s.port.toString())) {
          System.out.println(s+" Active");
          return true;
       } else {
