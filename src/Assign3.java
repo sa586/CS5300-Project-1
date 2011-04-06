@@ -39,7 +39,7 @@ public class Assign3 extends HttpServlet {
 	   response.setContentType("text/html");
 	   PrintWriter out = response.getWriter();
 	   String message = (String)session.getData("message");
-	   Integer count = (Integer)session.getData("count");
+	   Integer count = new Integer(session.getData("count"));
 	   //Initialize message
 	   if(message == null) {
 	      message = "Hello World!";
@@ -65,7 +65,7 @@ public class Assign3 extends HttpServlet {
 	      }
 	   }
 	   session.setData("message",message);
-	   session.setData("count",count);
+	   session.setData("count",new Integer(count).toString());
 	   out.println("<!DOCTYPE html>");
 	   out.println("<html><head></head><body>");
 	   out.println("<h2>("+count.toString()+") "+message+"</h2>");
