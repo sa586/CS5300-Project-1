@@ -2,7 +2,13 @@ package rpc;
 
 import groupMembership.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -21,6 +27,40 @@ import session.Session;
 public class RPCClient {
    static final int nQ = 1;
    
+
+   public static String unmarshal(byte[] data){
+    
+    try {
+      ByteArrayInputStream bis = new ByteArrayInputStream(data);
+      ObjectInput in = new ObjectInputStream(bis);
+      String output = (String) in.readObject();
+      return output;
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    } catch (ClassNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }
+   }
+   
+   public static byte[] marshal(String data){
+     
+    try {
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      ObjectOutput out = new ObjectOutputStream(bos);
+      out.writeObject(data);
+      byte[] output = bos.toByteArray();
+      return output;
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }    
+   }
+   
    /**
     * Return true if probe succeeded, false otherwise
     * @return
@@ -32,13 +72,18 @@ public class RPCClient {
         rpcSocket = new DatagramSocket();
         rpcSocket.setSoTimeout(1000); //Timeout after 1 second
         String callID = UUID.randomUUID().toString();
-        byte[] outBuf = new byte[4096];
-        outBuf = (callID + ",0,,").getBytes();
+        //byte[] outBuf = new byte[4096];
+        
+        String outstr = (callID + ",0,0,0");
+        byte[] outBuf = RPCClient.marshal(outstr);
+        
+        String newstr = RPCClient.unmarshal(outBuf);
+        
         DatagramPacket sendPkt;
         try {
           sendPkt = new DatagramPacket(outBuf, outBuf.length, s.ip, s.port);
           rpcSocket.send(sendPkt);
-          System.out.println("Sent packet: "+outBuf);
+          System.out.println("Sent packet: "+newstr);
         } catch (IOException e1) {
            // TODO Auto-generated catch block
            e1.printStackTrace();
@@ -49,7 +94,7 @@ public class RPCClient {
           do {
              recvPkt.setLength(inBuf.length);
              rpcSocket.receive(recvPkt);
-          } while(!(new String(recvPkt.getData())).split(",")[0].equals(callID));
+          } while(!(RPCClient.unmarshal(recvPkt.getData())).split(",")[0].equals(callID));
         } catch (IOException e1) {
            recvPkt = null;
            return false;
@@ -71,8 +116,8 @@ public class RPCClient {
       try {
          DatagramSocket rpcSocket = new DatagramSocket();
          String callID = UUID.randomUUID().toString();
-         byte[] outBuf = new byte[4096];
-         outBuf = (callID + ",1," + s.getSessionID() + "," + s.getVersion()).getBytes();
+         String outstr = (callID + ",1," + s.getSessionID() + "," + s.getVersion());
+         byte[] outBuf = RPCClient.marshal(outstr);
          for(Server e : s.getLocations()) {
             DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, e.ip, e.port);
             try {
@@ -88,7 +133,7 @@ public class RPCClient {
             do {
                recvPkt.setLength(inBuf.length);
                rpcSocket.receive(recvPkt);
-            } while(!(new String(recvPkt.getData())).split(",")[0].equals(callID));
+            } while(!(RPCClient.unmarshal(recvPkt.getData())).split(",")[0].equals(callID));
          } catch (IOException e1) {
             recvPkt = null;
          }
@@ -113,8 +158,8 @@ public class RPCClient {
       try {
          DatagramSocket rpcSocket = new DatagramSocket();
          String callID = UUID.randomUUID().toString();
-         byte[] outBuf = new byte[4096];
-         outBuf = (callID + ",2," + s.getSessionID() + "," + s.getVersion() + "," + s.getData("count") + "," + s.getData("message")).getBytes();
+         String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion() + "," + s.getData("count") + "," + s.getData("message"));
+         byte[] outBuf = RPCClient.marshal(outstr);
 
          for(Server e : servers) {
             DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, e.ip, e.port);
@@ -132,7 +177,7 @@ public class RPCClient {
             do {
                recvPkt.setLength(inBuf.length);
                rpcSocket.receive(recvPkt);
-            } while(!(new String(recvPkt.getData())).split(",")[0].equals(callID) || ++recCount < nQ);
+            } while(!(RPCClient.unmarshal(recvPkt.getData())).split(",")[0].equals(callID) || ++recCount < nQ);
          } catch (IOException e1) {
             recvPkt = null;
          }

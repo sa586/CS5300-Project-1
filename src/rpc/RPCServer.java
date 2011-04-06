@@ -45,12 +45,17 @@ public class RPCServer extends Thread {
       }
    }
    
+   
    private byte[] computeResponse(byte[] data, int length) {
-      System.out.println("Server got data: "+data.toString());
       //read data
       Session retrievedSession;
       byte[] returnVal = null;
-      String[] request = data.toString().split(",");
+      String requestString = RPCClient.unmarshal(data);
+      System.out.println("Server got data: "+requestString);
+      String[] request = requestString.split(",");
+      if (request.length < 4){
+        return null;
+      }
       String callid = request[0];
       int operationType = Integer.parseInt(request[1]);
       String sessionid = request[2];
@@ -77,7 +82,7 @@ public class RPCServer extends Thread {
         response = callid;
       }
       
-      returnVal = response.getBytes();
+      returnVal = RPCClient.marshal(response);
       return returnVal;
    }
 }
