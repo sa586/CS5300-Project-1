@@ -22,14 +22,14 @@ public class Session implements Serializable {
    private Integer version;
    private Date timestamp;
    private ArrayList<Server> locations;
-   private Hashtable<String, Object> data;
+   private Hashtable<String, String> data;
    
    public Session(String sessionID, ArrayList<Server> location) {
       this.setSessionID(sessionID);
       this.setLocations(location);
       this.version = 0;
       this.timestamp = new Date();
-      this.data = new Hashtable<String, Object>();
+      this.data = new Hashtable<String, String>();
    }
 
    public void setSessionID(String sessionID) {
@@ -42,6 +42,10 @@ public class Session implements Serializable {
 
    public String getVersion() {
       return version.toString();
+   }
+   
+   public void setVersion(Integer version){
+     this.version = version;
    }
 
    public void updateTimestamp() {
@@ -75,12 +79,19 @@ public class Session implements Serializable {
    public void incrementVersion() {
       this.version++;
    }
+   
+   //get data structure
+   
+   public Hashtable<String,String> getDataStructure(){
+     return this.data;
+   }
+   
    //Set session data
-   public void setData(String key, Object value) {
+   public void setData(String key, String value) {
       this.data.put(key, value);
    }
    //Get session data
-   public Object getData(String key) {
+   public String getData(String key) {
       return this.data.get(key);
    }
    

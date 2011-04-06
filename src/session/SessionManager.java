@@ -69,6 +69,7 @@ public class SessionManager {
       }
    }
    
+   
    /**
     * Destroy a session
     * Expire the cookie and delete session from table
@@ -177,4 +178,37 @@ public class SessionManager {
       return null;
    }
    
+   public static Session getSessionById(String sessionID, String version){
+     readlock.lock();
+     try {
+        Session session = sessions.get(sessionID);
+        if(session == null) {
+           return null;
+        } else {
+           //Check to see if the versions match
+           if(session.getVersion().equals(version)) {
+              return session;
+           } else {
+              return null;
+           }
+        }
+     } finally {
+        readlock.unlock();
+     }
+   }
+   
+   public static void putSession(String sessionid, String version, String count, String message){
+     writelock.lock();
+     Session session = sessions.get(sessionid);
+     if(session == null){
+       session = new Session(sessionid,null);
+     }
+     else{
+     }
+     session.setData("count", count);
+     session.setVersion(Integer.valueOf(version));
+     session.setData("message", message);
+     session.updateTimestamp();
+     writelock.unlock();
+   }
 }
