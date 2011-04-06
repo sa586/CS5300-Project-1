@@ -13,13 +13,10 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry kind="con" path="com.amazonaws.eclipse.sdk.AWS_JAVA_SDK">
+	<classpathentry exported="true" kind="con" path="com.amazonaws.eclipse.sdk.AWS_JAVA_SDK">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Jia/Desktop/aws-java-sdk-1.1.9/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Jia/Desktop/aws-java-sdk-1.1.9/lib/aws-java-sdk-1.1.9.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jia/Desktop/aws-java-sdk-1.1.9/lib/aws-java-sdk-1.1.9-javadoc.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jia/Desktop/aws-java-sdk-1.1.9/lib/aws-java-sdk-1.1.9-sources.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
