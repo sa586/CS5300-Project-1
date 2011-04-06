@@ -178,6 +178,12 @@ public class SessionManager {
       return null;
    }
    
+   /**
+    * Used in SSM Brick
+    * @param sessionID
+    * @param version
+    * @return
+    */
    public static Session getSessionById(String sessionID, String version){
      readlock.lock();
      try {
@@ -197,6 +203,13 @@ public class SessionManager {
      }
    }
    
+   /**
+    * Used in SSM Brick
+    * @param sessionid
+    * @param version
+    * @param count
+    * @param message
+    */
    public static void putSession(String sessionid, String version, String count, String message){
      writelock.lock();
      Session session = sessions.get(sessionid);
