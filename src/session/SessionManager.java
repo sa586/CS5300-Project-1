@@ -128,9 +128,6 @@ public class SessionManager {
   private static Session initialize(HttpServletResponse response) {
     String uuid = UUID.randomUUID().toString();
     Session s = new Session(uuid, GroupMembership.getServers());
-    s.setData("count", "0");
-    s.setData("message", "Hello World!");
-    s = RPCClient.put(s);
     /*
     writelock.lock();
     try {
@@ -179,6 +176,7 @@ public class SessionManager {
           servers.add(new Server(parts[0],parts[1]));
         }
         Session s = new Session(cookie_params[0], servers);
+        s.setVersion(Integer.valueOf(cookie_params[1]));
         Session session = RPCClient.get(s);
         if (session == null) {
           return null;
@@ -235,7 +233,7 @@ public class SessionManager {
         if (session.getVersion().equals(version)) {
           return session;
         } else {
-          System.out.println(session.getVersion() + " does not match with " + "version");
+          System.out.println(session.getVersion() + " does not match with " + version);
           return null;
         }
       }

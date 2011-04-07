@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import rpc.RPCClient;
 import rpc.RPCServer;
 import session.Session;
 import session.SessionManager;
@@ -109,6 +110,7 @@ public class Project1 extends HttpServlet {
     out.println("<h3>Version: "+session.getVersion()+"</h3>");
     out.println("<h3>Session: "+session+"</h3>");
     out.println("</body></html>");
+    while(RPCClient.put(session)==null);
   }
 
   /**

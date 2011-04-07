@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.UUID;
 
 import session.Session;
@@ -132,22 +133,19 @@ public class RPCClient {
       byte[] inBuf = new byte[4096];
       DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
       String response_str = null;
-      try {
-        do {
-          recvPkt.setLength(inBuf.length);
+      recvPkt.setLength(inBuf.length);
+      do {
+        try {
           rpcSocket.receive(recvPkt);
           response_str = RPCClient.unmarshal(inBuf);
 
-        } while (response_str == null || response_str.equals("")
-            || !(response_str.split(",")[0].equals(callID)));
-      } catch (IOException e1) {
-        e1.printStackTrace();
-        recvPkt = null;
-        response_str = null;
-      }
-      if(response_str == null) {
-        return s;
-      }
+        } catch (IOException e1) {
+          e1.printStackTrace();
+          return null;
+        } 
+      } while (response_str == null || response_str.equals("")
+          || !(response_str.split(",")[0].equals(callID)));
+
       System.out.println("Client received response: " + response_str);
       String[] response = response_str.split(",");
       s.setData("count", response[1]);
