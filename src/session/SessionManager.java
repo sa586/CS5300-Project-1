@@ -30,7 +30,7 @@ public class SessionManager {
   protected static final String cookieName = "CS5300SESSION";
   protected static final Integer sessionTimeout = 60; // Timeout time in seconds
                                                       // of session
-  protected static final Integer sessionCleanerFrequency = 5; // Delay in
+  protected static final Integer sessionCleanerFrequency = 60; // Delay in
                                                               // seconds for
                                                               // running cleaner
 
@@ -61,7 +61,6 @@ public class SessionManager {
       }
     }
     if (cookie == null) {
-      System.out.println("initializing cookie");
       return initialize(response);
     } else {
       Session session = getSessionFromCookie(cookie.getValue());
@@ -129,9 +128,9 @@ public class SessionManager {
   private static Session initialize(HttpServletResponse response) {
     String uuid = UUID.randomUUID().toString();
     Session s = new Session(uuid, GroupMembership.getServers());
-    s.setData("count", "1");
+    s.setData("count", "0");
     s.setData("message", "Hello World!");
-    while(RPCClient.put(s)==null);
+    s = RPCClient.put(s);
     /*
     writelock.lock();
     try {

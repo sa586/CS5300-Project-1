@@ -1,5 +1,22 @@
 ==Project 1==
 
+
+==Request Flow
+===New Session
+1. Initialize session
+2. Send session to all servers in Group, wait for NQ responses
+3. Return the session that was sent to the Group, with the first NQ responses added to it
+4. Save the session to the client's cookie
+===Existing Session
+1. Retrieve session id, version and servers from cookie
+2. Send get request to listed servers
+3. After first server responds, build a session and send it back to the client
+4. If no server responds affirmatively, initialize a session and follow the new session flow
+5. Update session with new data, and issue put to servers in session. If there are less than NQ servers responding, add additional servers from the server list
+
+==GroupMembership
+Keep track of all servers in group.
+
 ==Structure
 The main webserver class is Assign3 in the default package.
 The session package contains 3 classes, Session, SessionCleaner and SessionManager.

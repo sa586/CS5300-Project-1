@@ -12,24 +12,21 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.List;
 import java.util.UUID;
 
 import session.Session;
+
 /**
- * Operation codes:
- * probe: 0
- * get: 1
- * put: 2
+ * Operation codes: probe: 0 get: 1 put: 2
+ * 
  * @author Harrison
- *
+ * 
  */
 public class RPCClient {
-   static final int nQ = 1;
-   
+  static final int nQ = 1;
 
-   public static String unmarshal(byte[] data){
-    
+  public static String unmarshal(byte[] data) {
+
     try {
       ByteArrayInputStream bis = new ByteArrayInputStream(data);
       ObjectInput in = new ObjectInputStream(bis);
@@ -44,10 +41,10 @@ public class RPCClient {
       e.printStackTrace();
       return null;
     }
-   }
-   
-   public static byte[] marshal(String data){
-     
+  }
+
+  public static byte[] marshal(String data) {
+
     try {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       ObjectOutput out = new ObjectOutputStream(bos);
@@ -58,159 +55,173 @@ public class RPCClient {
       // TODO Auto-generated catch block
       e.printStackTrace();
       return null;
-    }    
-   }
-   
-   /**
-    * Return true if probe succeeded, false otherwise
-    * @return
-    */
-   public static boolean probe(Server s) {
-      System.out.println("Probing "+s);
-      DatagramSocket rpcSocket;
+    }
+  }
+
+  /**
+   * Return true if probe succeeded, false otherwise
+   * 
+   * @return
+   */
+  public static boolean probe(Server s) {
+    System.out.println("Probing " + s);
+    DatagramSocket rpcSocket;
+    try {
+      rpcSocket = new DatagramSocket();
+      rpcSocket.setSoTimeout(2000); // Timeout after 2 seconds
+      String callID = UUID.randomUUID().toString();
+      // byte[] outBuf = new byte[4096];
+
+      String outstr = (callID + ",0,0,0");
+      byte[] outBuf = RPCClient.marshal(outstr);
+
+      String newstr = RPCClient.unmarshal(outBuf);
+      DatagramPacket sendPkt;
       try {
-        rpcSocket = new DatagramSocket();
-        rpcSocket.setSoTimeout(1000); //Timeout after 1 second
-        String callID = UUID.randomUUID().toString();
-        //byte[] outBuf = new byte[4096];
-        
-        String outstr = (callID + ",0,0,0");
-        byte[] outBuf = RPCClient.marshal(outstr);
-        
-        String newstr = RPCClient.unmarshal(outBuf);
-        
-        DatagramPacket sendPkt;
-        try {
-          sendPkt = new DatagramPacket(outBuf, outBuf.length, s.ip, s.port);
-          rpcSocket.send(sendPkt);
-          System.out.println("Sent packet: "+newstr);
-        } catch (IOException e1) {
-           // TODO Auto-generated catch block
-           e1.printStackTrace();
-        }
-        byte[] inBuf = new byte[4096];
-        DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
-        try {
-          do {
-             recvPkt.setLength(inBuf.length);
-             rpcSocket.receive(recvPkt);
-          } while(!(RPCClient.unmarshal(recvPkt.getData())).split(",")[0].equals(callID));
-        } catch (IOException e1) {
-           recvPkt = null;
-           return false;
-        }
-      } catch (SocketException e) {
+        sendPkt = new DatagramPacket(outBuf, outBuf.length, s.ip, s.port);
+        rpcSocket.send(sendPkt);
+        System.out.println("Sent packet: " + newstr);
+      } catch (IOException e1) {
         // TODO Auto-generated catch block
-        e.printStackTrace();
+        e1.printStackTrace();
+      }
+      byte[] inBuf = new byte[4096];
+      DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+      try {
+        do {
+          recvPkt.setLength(inBuf.length);
+          rpcSocket.receive(recvPkt);
+        } while (!(RPCClient.unmarshal(recvPkt.getData())).split(",")[0]
+            .equals(callID));
+      } catch (IOException e1) {
+        recvPkt = null;
         return false;
       }
-      System.out.println(s+" Online");
-      return true;
-   }
-   
-   /**
-    * Find session data from SSM servers, return null if not found
-    * @return
-    */
-   public static Session get(Session s) {
-      try {
-         DatagramSocket rpcSocket = new DatagramSocket();
-         rpcSocket.setSoTimeout(1000); //Timeout after 1 second
-         String callID = UUID.randomUUID().toString();
-         String outstr = (callID + ",1," + s.getSessionID() + "," + s.getVersion());
-         byte[] outBuf = RPCClient.marshal(outstr);
-         System.out.println("Get call sending: " + outstr);
-         for(Server e : s.getLocations()) {
-            DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, e.ip, e.port);
-            try {
-               rpcSocket.send(sendPkt);
-            } catch (IOException e1) {
-               // TODO Auto-generated catch block
-               e1.printStackTrace();
-            }
-         }
-         byte[] inBuf = new byte[4096];
-         DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
-         try {
-           String response_str = null;
-            do {
-               recvPkt.setLength(inBuf.length);
-               rpcSocket.receive(recvPkt);
-               response_str = RPCClient.unmarshal(inBuf);
-               
-            } while(response_str.equals("") || !(response_str.split(",")[0].equals(callID)));
-         } catch (IOException e1) {
-            recvPkt = null;
-         }
-         String response_str = RPCClient.unmarshal(inBuf);
-         System.out.println("Client received response: " + response_str);
-         String[] response = response_str.split(",");
-         s.setData("count",response[1]);
-         s.setData("message",response[2]);
-         
-      } catch (SocketException e1) {
-         // TODO Auto-generated catch block
-         e1.printStackTrace();
-         return null;
+    } catch (SocketException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return false;
+    }
+    System.out.println(s + " Online");
+    return true;
+  }
+
+  /**
+   * Find session data from SSM servers, return null if not found
+   * 
+   * @return
+   */
+  public static Session get(Session s) {
+    try {
+      DatagramSocket rpcSocket = new DatagramSocket();
+      rpcSocket.setSoTimeout(2000); // Timeout after 2 seconds
+      String callID = UUID.randomUUID().toString();
+      String outstr = (callID + ",1," + s.getSessionID() + "," + s.getVersion());
+      byte[] outBuf = RPCClient.marshal(outstr);
+      System.out.println("Get call sending: " + outstr);
+      for (Server e : s.getLocations()) {
+        DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length,
+            e.ip, e.port);
+        try {
+          rpcSocket.send(sendPkt);
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
       }
-
-      return s;
-   }
-   
-   /**
-    * Send call to several destinations, and return the first NQ responses
-    * @return
-    */
-   public static Session put(Session s) {
+      byte[] inBuf = new byte[4096];
+      DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+      String response_str = null;
       try {
-         DatagramSocket rpcSocket = new DatagramSocket();
-         rpcSocket.setSoTimeout(1000); //Timeout after 1 second
-         String callID = UUID.randomUUID().toString();
-         String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion() + "," + s.getData("count") + "," + s.getData("message"));
-         byte[] outBuf = RPCClient.marshal(outstr);
-         System.out.println("Put call sending: " + outstr);
-         
+        do {
+          recvPkt.setLength(inBuf.length);
+          rpcSocket.receive(recvPkt);
+          response_str = RPCClient.unmarshal(inBuf);
 
-         for(Server e : s.getLocations()) {
-            DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, e.ip, e.port);
-            try {
-               rpcSocket.send(sendPkt);
-            } catch (IOException e1) {
-               // TODO Auto-generated catch block
-               e1.printStackTrace();
-            }//TODO what if less than nq servers respond, where is nq?
-         }
-         int recCount = 0;
-         byte[] inBuf = new byte[4096];
-         DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
-          do {
-             try {
-               recvPkt.setLength(inBuf.length);
-              rpcSocket.receive(recvPkt);
-              String response = RPCClient.unmarshal(inBuf);
-              System.out.println("Put client received:" + response);
-              if (response.split(",")[0].equals(callID)){
-                recCount++;
-              }
-   
-              System.out.println(recCount);
-            } catch (IOException e1) {
-              // TODO Auto-generated catch block
-              e1.printStackTrace();
-              return null;
-              
-            }
-          } while(recCount < nQ);
-         
-      } catch (SocketException e1) {
-         // TODO Auto-generated catch block
-         e1.printStackTrace();
-         return null;
+        } while (response_str == null || response_str.equals("")
+            || !(response_str.split(",")[0].equals(callID)));
+      } catch (IOException e1) {
+        e1.printStackTrace();
+        recvPkt = null;
+        response_str = null;
       }
+      if(response_str == null) {
+        return s;
+      }
+      System.out.println("Client received response: " + response_str);
+      String[] response = response_str.split(",");
+      s.setData("count", response[1]);
+      s.setData("message", response[2]);
 
-      System.out.println("Client finished put");
-      return s;
-      
-   }
-   
+    } catch (SocketException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+      return null;
+    }
+
+    return s;
+  }
+
+  /**
+   * Send call to several destinations, and return the first NQ responses
+   * 
+   * @return
+   */
+  public static Session put(Session s) {
+    try {
+      DatagramSocket rpcSocket = new DatagramSocket();
+      rpcSocket.setSoTimeout(2000); // Timeout after 2 seconds
+      String callID = UUID.randomUUID().toString();
+      String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion()
+          + "," + s.getData("count") + "," + s.getData("message"));
+      byte[] outBuf = RPCClient.marshal(outstr);
+      System.out.println("Put call sending: " + outstr);
+
+      for (Server e : s.getLocations()) {
+        DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length,
+            e.ip, e.port);
+        try {
+          rpcSocket.send(sendPkt);
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }// TODO what if less than nq servers respond, where is nq?
+      }
+      s.clearLocations();
+      System.out.println("Sent puts, waiting for receive");
+      rpcSocket.setSoTimeout(0);
+      int recCount = 0;
+      byte[] inBuf = new byte[4096];
+      DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+      do {
+        try {
+          recvPkt.setLength(inBuf.length);
+          rpcSocket.receive(recvPkt);
+          String response = RPCClient.unmarshal(inBuf);
+          System.out.println("Put client received:" + response);
+          if (response.split(",")[0].equals(callID)) {
+            recCount++;
+            s.addLocation(new Server(recvPkt.getAddress(), recvPkt.getPort()));
+          }
+
+          System.out.println(recCount);
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+          return null;
+
+        }
+      } while (recCount < nQ);
+
+    } catch (SocketException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+      return null;
+    }
+
+    System.out.println("Client finished put");
+    return s;
+
+  }
+
 }

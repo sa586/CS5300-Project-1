@@ -39,7 +39,6 @@ public class Project1 extends HttpServlet {
       localServer = new Server(InetAddress.getLocalHost(), rpcServer.getPort());
 
       // Start GroupMembership service
-      System.out.println("Kinda happy");
       gm = new GroupMembership(localServer);
       new Thread(gm).start();
     } catch (UnknownHostException e) {
@@ -54,11 +53,16 @@ public class Project1 extends HttpServlet {
     SessionManager.startCleaner();
   }
 
+  /*
   public void destroy() {
     rpcServer.cleanup();
     gm.cleanup();
     SessionManager.cleanup();
+    
+    rpcServer.destroy();
+    gm.destroy();
   }
+  */
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
@@ -103,6 +107,7 @@ public class Project1 extends HttpServlet {
     out.println("<h3>Server: "+localServer+"</h3>");
     out.println("<h3>SessionID: "+session.getSessionID()+"</h3>");
     out.println("<h3>Version: "+session.getVersion()+"</h3>");
+    out.println("<h3>Session: "+session+"</h3>");
     out.println("</body></html>");
   }
 

@@ -30,10 +30,9 @@ public class GroupMembership extends Thread {
    
    public GroupMembership(Server s) throws IOException {
       current = s;
-      System.out.println("Happy");
+      servers.add(current);
       sdb = new AmazonSimpleDBClient(new PropertiesCredentials(
                GroupMembership.class.getResourceAsStream("AwsCredentials.properties")));
-      System.out.println("Sad");
       checkRound();
    }
    

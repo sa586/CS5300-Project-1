@@ -3,7 +3,6 @@ package session;
 import groupMembership.Server;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -15,9 +14,6 @@ import java.util.List;
  *
  */
 public class Session implements Serializable {
-   /**
-    * 
-    */
    private static final long serialVersionUID = 4376448148045677097L;
    private String sessionID;
    private Integer version;
@@ -58,7 +54,15 @@ public class Session implements Serializable {
    }
 
    public void setLocations(List<Server> list) {
-      this.locations = list;
+      locations = list;
+   }
+   public void clearLocations() {
+     locations.clear();
+   }
+   public void addLocation(Server s) {
+     if(!locations.contains(s)) {
+       locations.add(s);
+     }
    }
    public List<Server> getLocations() {
       return locations;
@@ -96,4 +100,7 @@ public class Session implements Serializable {
       return this.data.get(key);
    }
    
+   public String toString() {
+     return "ID:"+sessionID+"<br />Version:"+version+"<br />Locations:"+this.getLocationsString();
+   }
 }
