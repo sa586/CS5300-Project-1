@@ -115,6 +115,7 @@ public class RPCClient {
    public static Session get(Session s) {
       try {
          DatagramSocket rpcSocket = new DatagramSocket();
+         rpcSocket.setSoTimeout(1000); //Timeout after 1 second
          String callID = UUID.randomUUID().toString();
          String outstr = (callID + ",1," + s.getSessionID() + "," + s.getVersion());
          byte[] outBuf = RPCClient.marshal(outstr);
@@ -160,6 +161,7 @@ public class RPCClient {
    public static Session put(Session s) {
       try {
          DatagramSocket rpcSocket = new DatagramSocket();
+         rpcSocket.setSoTimeout(1000); //Timeout after 1 second
          String callID = UUID.randomUUID().toString();
          String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion() + "," + s.getData("count") + "," + s.getData("message"));
          byte[] outBuf = RPCClient.marshal(outstr);
@@ -182,7 +184,10 @@ public class RPCClient {
             do {
                recvPkt.setLength(inBuf.length);
                rpcSocket.receive(recvPkt);
-            } while(!(RPCClient.unmarshal(recvPkt.getData())).split(",")[0].equals(callID) || ++recCount < nQ);
+               if (RPCClient.unmarshal(recvPkt.getData()).split(",")[0].equals(callID)){
+                 recCount++;
+               }
+            } while(++recCount < nQ);
          } catch (IOException e1) {
             recvPkt = null;
          }
