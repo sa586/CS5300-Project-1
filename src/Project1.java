@@ -66,17 +66,21 @@ public class Project1 extends HttpServlet {
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
     String message = (String) session.getData("message");
-    Integer count = new Integer(session.getData("count"));
+    String count = session.getData("count");
     // Initialize message
     if (message == null) {
       message = "Hello World!";
     }
-    count++;
+    if (count == null) {
+      count = "1";
+    } else {
+      count = (new Integer(1 + Integer.parseInt(count))).toString();
+    }
     String cmd = request.getParameter("cmd");
     if (cmd != null) {
       if (cmd.equals("Replace")) {
         message = request.getParameter("replace_text");
-        count = 1;
+        count = "1";
       } else if (cmd.equals("LogOut")) {
         SessionManager.destroy(request, response, session);
         out.println("<!DOCTYPE html>");

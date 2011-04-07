@@ -118,6 +118,7 @@ public class RPCClient {
          String callID = UUID.randomUUID().toString();
          String outstr = (callID + ",1," + s.getSessionID() + "," + s.getVersion());
          byte[] outBuf = RPCClient.marshal(outstr);
+         System.out.println("Get call sending: " + outstr);
          for(Server e : s.getLocations()) {
             DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, e.ip, e.port);
             try {
@@ -137,7 +138,7 @@ public class RPCClient {
          } catch (IOException e1) {
             recvPkt = null;
          }
-         String[] response = inBuf.toString().split(",");
+         String[] response = RPCClient.unmarshal(inBuf).split(",");
          s.setData("count",response[1]);
          s.setData("message",response[2]);
          
@@ -160,6 +161,8 @@ public class RPCClient {
          String callID = UUID.randomUUID().toString();
          String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion() + "," + s.getData("count") + "," + s.getData("message"));
          byte[] outBuf = RPCClient.marshal(outstr);
+         System.out.println("Get call sending: " + outstr);
+         
 
          for(Server e : s.getLocations()) {
             DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, e.ip, e.port);

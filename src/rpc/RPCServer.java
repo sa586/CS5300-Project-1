@@ -87,7 +87,7 @@ public class RPCServer extends Thread {
         SessionManager.putSession(sessionid,sessionVersion, count, message);
         response = callid;
       }
-      
+      System.out.println("Server responding with: " + response);
       returnVal = RPCClient.marshal(response);
       return returnVal;
    }
