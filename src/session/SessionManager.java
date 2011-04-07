@@ -48,10 +48,10 @@ public class SessionManager {
    * Retrieve a session from the table or create one Increment the version of
    * the session Save this back as a cookie
    */
-  public static Session getAndIncrement(HttpServletRequest request,
-      HttpServletResponse response) {
+  public static Session getAndIncrement(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
     Cookie cookie = null;
+    Session session;
     if (cookies != null) {
       for (int i = 0; i < cookies.length; i++) {
         Cookie c = cookies[i];
@@ -61,20 +61,23 @@ public class SessionManager {
       }
     }
     if (cookie == null) {
-      return initialize(response);
+      session = initialize();
     } else {
-      Session session = getSessionFromCookie(cookie.getValue());
+      session = getSessionFromCookie(cookie.getValue());
       // If we are unable to get session
       if (session == null) {
-        return initialize(response);
-        
+        session = initialize();
       } else {
         session.incrementVersion();
-        cookie.setValue(makeCookie(session));
-        response.addCookie(cookie);
-        return session;
       }
     }
+    return session;
+  }
+  
+  public static void putCookie(HttpServletResponse response, Session session) {
+    Cookie cookie = new Cookie(cookieName, makeCookie(session));
+    cookie.setMaxAge(sessionTimeout);
+    response.addCookie(cookie);
   }
 
   /**
@@ -123,9 +126,9 @@ public class SessionManager {
   }
 
   /**
-   * Create a new session and add cookie for session
+   * Create a new session
    */
-  private static Session initialize(HttpServletResponse response) {
+  private static Session initialize() {
     String uuid = UUID.randomUUID().toString();
     Session s = new Session(uuid, GroupMembership.getServers());
     /*
@@ -135,9 +138,6 @@ public class SessionManager {
     } finally {
       writelock.unlock();
     }*/
-    Cookie c = new Cookie(cookieName, makeCookie(s));
-    c.setMaxAge(sessionTimeout);
-    response.addCookie(c);
     return s;
   }
 

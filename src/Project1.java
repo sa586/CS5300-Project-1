@@ -70,7 +70,7 @@ public class Project1 extends HttpServlet {
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    Session session = SessionManager.getAndIncrement(request, response);
+    Session session = SessionManager.getAndIncrement(request);
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
     String message = (String) session.getData("message");
@@ -114,9 +114,10 @@ public class Project1 extends HttpServlet {
     out.println("<h3>Session: "+session+"</h3>");
     out.println("</body></html>");
     int numAttempted = 0;
-    while(RPCClient.put(session)==null && numAttempted < 3) {
+    while((session = RPCClient.put(session)) == null && numAttempted < 3) {
       numAttempted++;
     }
+    SessionManager.putCookie(response, session);
   }
 
   /**
