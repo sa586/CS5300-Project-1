@@ -19,17 +19,13 @@ import groupMembership.Server;
 public class Project1 extends HttpServlet {
   private static final long serialVersionUID = 8815322823956211829L;
 
-  private Server localServer;
+  private static Server localServer;
 
-  private RPCServer rpcServer;
-  private GroupMembership gm;
+  private static RPCServer rpcServer;
+  private static GroupMembership gm;
 
-  /**
-   * @param args
-   * @throws Exception
-   */
-  public Project1() {
-    super();
+  
+  static {
     // Startup server
     rpcServer = new RPCServer();
     new Thread(rpcServer).start();
@@ -52,6 +48,13 @@ public class Project1 extends HttpServlet {
     
     // Start session cleaner
     SessionManager.startCleaner();
+  }
+  /**
+   * @param args
+   * @throws Exception
+   */
+  public Project1() {
+    super();
   }
 
   /*
@@ -110,7 +113,10 @@ public class Project1 extends HttpServlet {
     out.println("<h3>Version: "+session.getVersion()+"</h3>");
     out.println("<h3>Session: "+session+"</h3>");
     out.println("</body></html>");
-    while(RPCClient.put(session)==null);
+    int numAttempted = 0;
+    while(RPCClient.put(session)==null && numAttempted < 3) {
+      numAttempted++;
+    }
   }
 
   /**

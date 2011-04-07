@@ -9,10 +9,12 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.UUID;
 
 import session.Session;
@@ -149,12 +151,15 @@ public class RPCClient {
       System.out.println("Client received response: " + response_str);
       String[] response = response_str.split(",");
       s.setData("count", response[1]);
-      s.setData("message", response[2]);
+      s.setData("message", URLDecoder.decode(response[2],"UTF-8"));
 
     } catch (SocketException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
       return null;
+    } catch (UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
     return s;
@@ -171,7 +176,7 @@ public class RPCClient {
       rpcSocket.setSoTimeout(2000); // Timeout after 2 seconds
       String callID = UUID.randomUUID().toString();
       String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion()
-          + "," + s.getData("count") + "," + s.getData("message"));
+          + "," + s.getData("count") + "," + URLEncoder.encode(s.getData("message"),"UTF-8"));
       byte[] outBuf = RPCClient.marshal(outstr);
       System.out.println("Put call sending: " + outstr);
 
@@ -215,6 +220,9 @@ public class RPCClient {
       // TODO Auto-generated catch block
       e1.printStackTrace();
       return null;
+    } catch (UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
     System.out.println("Client finished put");
