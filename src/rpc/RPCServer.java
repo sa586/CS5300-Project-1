@@ -76,9 +76,14 @@ public class RPCServer extends Thread {
       else if (operationType == 1){
         //get call
         retrievedSession = SessionManager.getSessionById(sessionid,sessionVersion);
-        response = callid;
-        response += "," + retrievedSession.getData("count");
-        response += "," + retrievedSession.getData("message");
+        if(retrievedSession == null){
+          response = "";
+        }
+        else{
+          response = callid;
+          response += "," + retrievedSession.getData("count");
+          response += "," + retrievedSession.getData("message");
+        }
       }
       else if (operationType == 2){
         //put call

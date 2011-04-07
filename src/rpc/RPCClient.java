@@ -132,10 +132,13 @@ public class RPCClient {
          byte[] inBuf = new byte[4096];
          DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
          try {
+           String response_str = null;
             do {
                recvPkt.setLength(inBuf.length);
                rpcSocket.receive(recvPkt);
-            } while(!(RPCClient.unmarshal(recvPkt.getData())).split(",")[0].equals(callID));
+               response_str = RPCClient.unmarshal(inBuf);
+               
+            } while(response_str.equals("") || !(response_str.split(",")[0].equals(callID)));
          } catch (IOException e1) {
             recvPkt = null;
          }
@@ -180,17 +183,24 @@ public class RPCClient {
          int recCount = 0;
          byte[] inBuf = new byte[4096];
          DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
-         try {
-            do {
+          do {
+             try {
                recvPkt.setLength(inBuf.length);
-               rpcSocket.receive(recvPkt);
-               if (RPCClient.unmarshal(recvPkt.getData()).split(",")[0].equals(callID)){
-                 recCount++;
-               }
-            } while(++recCount < nQ);
-         } catch (IOException e1) {
-            recvPkt = null;
-         }
+              rpcSocket.receive(recvPkt);
+              String response = RPCClient.unmarshal(inBuf);
+              System.out.println("Put client received:" + response);
+              if (response.split(",")[0].equals(callID)){
+                recCount++;
+              }
+   
+              System.out.println(recCount);
+            } catch (IOException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+              return null;
+              
+            }
+          } while(recCount < nQ);
          
       } catch (SocketException e1) {
          // TODO Auto-generated catch block

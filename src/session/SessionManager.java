@@ -61,12 +61,14 @@ public class SessionManager {
       }
     }
     if (cookie == null) {
+      System.out.println("initializing cookie");
       return initialize(response);
     } else {
       Session session = getSessionFromCookie(cookie.getValue());
       // If we are unable to get session
       if (session == null) {
         return initialize(response);
+        
       } else {
         session.incrementVersion();
         cookie.setValue(makeCookie(session));
@@ -127,7 +129,9 @@ public class SessionManager {
   private static Session initialize(HttpServletResponse response) {
     String uuid = UUID.randomUUID().toString();
     Session s = new Session(uuid, GroupMembership.getServers());
-    RPCClient.put(s);
+    s.setData("count", "1");
+    s.setData("message", "Hello World!");
+    while(RPCClient.put(s)==null);
     /*
     writelock.lock();
     try {
@@ -220,16 +224,19 @@ public class SessionManager {
    * @return
    */
   public static Session getSessionById(String sessionID, String version) {
+    System.out.println("Server trying to retrieve: " + sessionID + "," + version);
     readlock.lock();
     try {
       Session session = sessions.get(sessionID);
       if (session == null) {
+        System.out.println("server doesn't have session");
         return null;
       } else {
         // Check to see if the versions match
         if (session.getVersion().equals(version)) {
           return session;
         } else {
+          System.out.println(session.getVersion() + " does not match with " + "version");
           return null;
         }
       }
@@ -248,11 +255,12 @@ public class SessionManager {
    */
   public static void putSession(String sessionid, String version, String count,
       String message) {
+    System.out.println("server adding session: " + sessionid +"," + version);
     writelock.lock();
     Session session = sessions.get(sessionid);
     if (session == null) {
       session = new Session(sessionid, null);
-    } else {
+      sessions.put(sessionid, session);
     }
     session.setData("count", count);
     session.setVersion(Integer.valueOf(version));
