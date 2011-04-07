@@ -24,12 +24,10 @@ public class Project1 extends HttpServlet {
   private static RPCServer rpcServer;
   private static GroupMembership gm;
 
-  
   static {
     // Startup server
     rpcServer = new RPCServer();
     new Thread(rpcServer).start();
-
 
     try {
       // Get IP and Port of RPCServer
@@ -45,10 +43,11 @@ public class Project1 extends HttpServlet {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    
+
     // Start session cleaner
     SessionManager.startCleaner();
   }
+
   /**
    * @param args
    * @throws Exception
@@ -58,38 +57,41 @@ public class Project1 extends HttpServlet {
   }
 
   /*
-  public void destroy() {
-    rpcServer.cleanup();
-    gm.cleanup();
-    SessionManager.cleanup();
-    
-    rpcServer.destroy();
-    gm.destroy();
-  }
-  */
+   * public void destroy() { rpcServer.cleanup(); gm.cleanup();
+   * SessionManager.cleanup();
+   * 
+   * rpcServer.destroy(); gm.destroy(); }
+   */
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    Session session = SessionManager.getAndIncrement(request);
+    // Set response objects
     response.setContentType("text/html");
     PrintWriter out = response.getWriter();
+
+    // Load session from cookie or create new one if doesn't exist
+    Session session = SessionManager.getAndIncrement(request);
+
     String message = (String) session.getData("message");
     String count = session.getData("count");
     // Initialize message
     if (message == null) {
       message = "Hello World!";
     }
+    // Initialize count or increment
     if (count == null) {
       count = "1";
     } else {
       count = (new Integer(1 + Integer.parseInt(count))).toString();
     }
+    // Check user submission command
     String cmd = request.getParameter("cmd");
     if (cmd != null) {
       if (cmd.equals("Replace")) {
         message = request.getParameter("replace_text");
         count = "1";
       } else if (cmd.equals("LogOut")) {
+        // Do something different on logout
         SessionManager.destroy(request, response, session);
         out.println("<!DOCTYPE html>");
         out.println("<html><head></head><body>");
@@ -98,8 +100,20 @@ public class Project1 extends HttpServlet {
         return;
       }
     }
+    // Write changed variables back to session
     session.setData("message", message);
-    session.setData("count", new Integer(count).toString());
+    session.setData("count", count);
+
+    // Attempt put
+    if (RPCClient.put(session) == null) {
+      // If put fails, try putting to as many as possible
+      session.setLocations(GroupMembership.getServers());
+      RPCClient.put(session);
+    }
+    // Write back cookie
+    SessionManager.putCookie(response, session);
+
+    // Output HTML to page
     out.println("<!DOCTYPE html>");
     out.println("<html><head></head><body>");
     out.println("<h2>(" + count.toString() + ") " + message + "</h2>");
@@ -108,21 +122,13 @@ public class Project1 extends HttpServlet {
     out.println("<div><input type=\"submit\" value=\"Refresh\" name=\"cmd\" /></div>");
     out.println("<div><input type=\"submit\" value=\"LogOut\" name=\"cmd\" /></div>");
     out.println("</form>");
-    out.println("<h3>Server: "+localServer+"</h3>");
-    out.println("<h3>SessionID: "+session.getSessionID()+"</h3>");
-    out.println("<h3>Version: "+session.getVersion()+"</h3>");
-    out.println("<h3>Session: "+session+"</h3>");
+    out.println("<h3>Server: " + localServer + "</h3>");
+    out.println("<h3>Session: " + session + "</h3>");
     out.println("</body></html>");
-    int numAttempted = 0;
-    while((session = RPCClient.put(session)) == null && numAttempted < 3) {
-      numAttempted++;
-    }
-    SessionManager.putCookie(response, session);
   }
 
   /**
-   * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-   *      response) Simply refer to doGet
+   * Simply refer to doGet
    */
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {

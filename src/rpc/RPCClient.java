@@ -26,7 +26,7 @@ import session.Session;
  * 
  */
 public class RPCClient {
-  static final int nQ = 1;
+  static final double nQ = 0.5;
 
   public static String unmarshal(byte[] data) {
 
@@ -192,7 +192,6 @@ public class RPCClient {
       }
       s.clearLocations();
       System.out.println("Sent puts, waiting for receive");
-      rpcSocket.setSoTimeout(0);
       int recCount = 0;
       byte[] inBuf = new byte[4096];
       DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
@@ -214,7 +213,7 @@ public class RPCClient {
           return null;
 
         }
-      } while (recCount < nQ);
+      } while (recCount < (nQ * GroupMembership.numServers()));
 
     } catch (SocketException e1) {
       // TODO Auto-generated catch block

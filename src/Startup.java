@@ -19,6 +19,7 @@ public class Startup extends HttpServlet {
   public Startup() {
     super();
     // TODO Auto-generated constructor stub
+    System.out.println(Project1.class);
   }
 
   /**
