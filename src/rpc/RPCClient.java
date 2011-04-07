@@ -138,7 +138,9 @@ public class RPCClient {
          } catch (IOException e1) {
             recvPkt = null;
          }
-         String[] response = RPCClient.unmarshal(inBuf).split(",");
+         String response_str = RPCClient.unmarshal(inBuf);
+         System.out.println("Client received response: " + response_str);
+         String[] response = response_str.split(",");
          s.setData("count",response[1]);
          s.setData("message",response[2]);
          
@@ -161,7 +163,7 @@ public class RPCClient {
          String callID = UUID.randomUUID().toString();
          String outstr = (callID + ",2," + s.getSessionID() + "," + s.getVersion() + "," + s.getData("count") + "," + s.getData("message"));
          byte[] outBuf = RPCClient.marshal(outstr);
-         System.out.println("Get call sending: " + outstr);
+         System.out.println("Put call sending: " + outstr);
          
 
          for(Server e : s.getLocations()) {
@@ -191,6 +193,7 @@ public class RPCClient {
          return null;
       }
 
+      System.out.println("Client finished put");
       return s;
       
    }
