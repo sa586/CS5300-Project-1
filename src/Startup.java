@@ -57,6 +57,7 @@ public class Startup extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     // TODO Auto-generated method stub
+    response.setContentType("text/html");
     PrintWriter out = response.getWriter();
     out.println("<h3><a href=\"Project1\">Probably meant to go here</a></h3>");
   }
