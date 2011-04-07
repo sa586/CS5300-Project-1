@@ -19,34 +19,11 @@ import groupMembership.Server;
 public class Project1 extends HttpServlet {
   private static final long serialVersionUID = 8815322823956211829L;
 
-  private static Server localServer;
+  public static Server localServer;
 
-  private static RPCServer rpcServer;
-  private static GroupMembership gm;
+  public static RPCServer rpcServer;
+  public static GroupMembership gm;
 
-  static {
-    // Startup server
-    rpcServer = new RPCServer();
-    new Thread(rpcServer).start();
-
-    try {
-      // Get IP and Port of RPCServer
-      localServer = new Server(InetAddress.getLocalHost(), rpcServer.getPort());
-
-      // Start GroupMembership service
-      gm = new GroupMembership(localServer);
-      new Thread(gm).start();
-    } catch (UnknownHostException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    // Start session cleaner
-    SessionManager.startCleaner();
-  }
 
   /**
    * @param args

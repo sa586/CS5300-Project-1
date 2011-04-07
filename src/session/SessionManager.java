@@ -28,7 +28,7 @@ import com.google.gson.*;
  */
 public class SessionManager {
   protected static final String cookieName = "CS5300SESSION";
-  protected static final Integer sessionTimeout = 60; // Timeout time in seconds
+  protected static final Integer sessionTimeout = 600; // Timeout time in seconds
                                                       // of session
   protected static final Integer sessionCleanerFrequency = 60; // Delay in
                                                               // seconds for

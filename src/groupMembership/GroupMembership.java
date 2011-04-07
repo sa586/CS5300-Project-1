@@ -28,7 +28,7 @@ public class GroupMembership extends Thread {
 
   AmazonSimpleDB sdb;
   Server current;
-  Random r = new Random();
+  static Random r = new Random();
 
   protected static final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
   protected static final Lock readlock = rwl.readLock();
@@ -134,10 +134,22 @@ public class GroupMembership extends Thread {
     return ss;
   }
 
+  public static List<Server> getServers(int num) {
+    writelock.lock();
+    Collections.shuffle(servers,r);
+    writelock.unlock();
+    readlock.lock();
+    List<Server> ss = new ArrayList<Server>(); 
+    ss.addAll(servers.subList(0, num));
+    readlock.unlock();
+    return ss;
+  }
+
   public static int numServers() {
     readlock.lock();
     int size = servers.size();
     readlock.unlock();
     return size;
   }
+
 }

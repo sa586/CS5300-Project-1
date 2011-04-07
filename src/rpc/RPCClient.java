@@ -26,7 +26,8 @@ import session.Session;
  * 
  */
 public class RPCClient {
-  static final double nQ = 0.5;
+  static final double nQ = 0.25;
+  static final double n = 0.5;
 
   public static String unmarshal(byte[] data) {
 
@@ -172,6 +173,7 @@ public class RPCClient {
    */
   public static Session put(Session s) {
     try {
+      int numServers = GroupMembership.numServers();
       DatagramSocket rpcSocket = new DatagramSocket();
       rpcSocket.setSoTimeout(2000); // Timeout after 2 seconds
       String callID = UUID.randomUUID().toString();
@@ -179,8 +181,8 @@ public class RPCClient {
           + "," + s.getData("count") + "," + URLEncoder.encode(s.getData("message"),"UTF-8"));
       byte[] outBuf = RPCClient.marshal(outstr);
       System.out.println("Put call sending: " + outstr);
-
-      for (Server e : s.getLocations()) {
+      
+      for (Server e : GroupMembership.getServers((int) Math.ceil(n * numServers))) {
         DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length,
             e.ip, e.port);
         try {
@@ -213,7 +215,7 @@ public class RPCClient {
           return null;
 
         }
-      } while (recCount < (nQ * GroupMembership.numServers()));
+      } while (recCount < (nQ * numServers));
 
     } catch (SocketException e1) {
       // TODO Auto-generated catch block
