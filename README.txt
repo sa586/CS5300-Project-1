@@ -1,6 +1,5 @@
 ==Project 1==
 
-
 ==Request Flow
 ===New Session
 1. Initialize session
@@ -14,18 +13,21 @@
 4. If no server responds affirmatively, initialize a session and follow the new session flow
 5. Update session with new data, and issue put to servers in session. If there are less than NQ servers responding, add additional servers from the server list
 
-==GroupMembership
-Keep track of all servers in group.
-
 ==Structure
-The main webserver class is Assign3 in the default package.
-The session package contains 3 classes, Session, SessionCleaner and SessionManager.
+The main webserver class is Project1 in the default package.
+The Startup class initializes the static variables in Project1. This is done when AWS does a health check on the instance, and starts the RPCServer and other threads.
 
 ===Project1
 Project1 is responsible for managing what happens to a request when it is received by the server. It also manages what happens at startup and shutdown.
 At startup it starts SessionCleaner, and at shutdown it cleans up SessionCleaner.
 On a POST or GET request, it looks for a session by first checking the local session table and then by issuing an RPC get call. 
 It modifies the contents of the session appropriately and outputs the HTML of the form and desired data as well. At the end, it puts the session into its local SSM and issues an RPC put call to store the session.
+
+===Server
+Server object that has an IP and a port of a RPCServer.
+
+===GroupMembership
+Keep track of all servers in group.
 
 ===RPCClient/RPCServer
 RPCClient contains the probe, get and put functions. All the functions follow a similar layout. The necessary message is marshalled into a byte[] and sent as a UDP packet.
@@ -46,5 +48,4 @@ cleanup cancels the scheduling of SessionCleaner
 SessionCleaner iterates through the session table and checks the timestamp on the sessions. If the timestamp is older than the expire time, it delete the session from the table.
 
 ==How To Run
-It is easy to run the project from Eclipse if Tomcat is installed and configured. The default URL set is http://localhost/CS5300/Assign3
-As a .war file, the project can be deployed to a web server or platform such as Amazon's Elastic Beanstalk. Simply update the provided CS5300.war file onto the service and run it. Doing so will deploy the application to http://yoururl/Assign3
+As a .war file, the project can be deployed to a web server or platform such as Amazon's Elastic Beanstalk. Simply update the provided CS5300.war file onto the service and run it. Doing so will deploy the application to http://yoururl/Project1
