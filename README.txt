@@ -21,17 +21,23 @@ Keep track of all servers in group.
 The main webserver class is Assign3 in the default package.
 The session package contains 3 classes, Session, SessionCleaner and SessionManager.
 
-===Assign3
-Assign3 is responsible for managing what happens to a request when it is received by the server. It also manages what happens at atartup and shutdown.
+===Project1
+Project1 is responsible for managing what happens to a request when it is received by the server. It also manages what happens at startup and shutdown.
 At startup it starts SessionCleaner, and at shutdown it cleans up SessionCleaner.
-On a POST or GET request, it looks for a session in the session table by passing the request and response to SessionManager. It then initializes a message in the session and modifies the contents of the session. It outputs the HTML of the form and desired data as well.
+On a POST or GET request, it looks for a session by first checking the local session table and then by issuing an RPC get call. 
+It modifies the contents of the session appropriately and outputs the HTML of the form and desired data as well. At the end, it puts the session into its local SSM and issues an RPC put call to store the session.
+
+===RPCClient/RPCServer
+RPCClient contains the probe, get and put functions. All the functions follow a similar layout. The necessary message is marshalled into a byte[] and sent as a UDP packet.
+The client then waits for a response and unmarshals it. If the response has the appropriate callid, it processes the response (probe returns successfully, get sets the session data, put returns successfully after the right amount of servers responded).
+RPCServer loops continually and when it receives a request, it calls computeResponse() to process the request. computeResponse parses the request, performs the necessary actions (acknowledging a probe, retrieving a session for get, and adding a session for put), and returns a response to be sent back.
 
 ===Session
 Session is responsible for the session attributes. As specified in the assignment, a Session has a sessionID, version, timestamp and locations. It also is able to store data on the server side, and thus has a HashTable on the server. This HashTable is not threadsafe, as we assume that sessions cannot be accessed concurrently.
 
 ===SessionManager
-SessionManager stores the Session objects into a threadsafe hashtable. It has 4 public functions: getAndIncrement, destroy, startCleaner and cleanup.
-getAndIncrement searches the table for a given sessionID. If it finds it and the version numbers match, it increments the version number and sets the cookie with the new version number. If it does not find it, it initializes a session with a globally unique id (GUID). This ensures that the sessionIDs will never conflict.
+SessionManager stores the Session objects into a threadsafe hashtable. It contains functions to add/delete sessions and to retrieve sessions with cookie information.
+getAndIncrement retrieves the session for a given sessionID (first by checking the local table and then by issuing the RPC get call). If it finds it and the version numbers match, it increments the version number and sets the cookie with the new version number. If it does not find it, it initializes a session with a globally unique id (GUID). This ensures that the sessionIDs will never conflict.
 destroy looks in the session table after reading the session cookie. It then deletes the session from the table and expires the session cookie.
 startCleaner starts SessionCleaner and has it run in specified intervals.
 cleanup cancels the scheduling of SessionCleaner

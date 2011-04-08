@@ -1,10 +1,14 @@
 package rpc;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
 import session.Session;
 import session.SessionManager;
 
@@ -81,14 +85,26 @@ public class RPCServer extends Thread {
         }
         else{
           response = callid;
-          response += "," + retrievedSession.getData("count");
-          response += "," + retrievedSession.getData("message");
+          try {
+            response += "," + URLEncoder.encode(retrievedSession.getData("count"),"UTF-8");
+            response += "," + URLEncoder.encode(retrievedSession.getData("message"),"UTF-8");
+          } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
         }
       }
       else if (operationType == 2){
         //put call
-        String count = request[4];
-        String message = request[5];
+        String count = null;
+        String message = null;
+        try {
+          count = URLDecoder.decode(request[4],"UTF-8");
+          message = URLDecoder.decode(request[5],"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
         SessionManager.putSession(sessionid,sessionVersion, count, message);
         response = callid;
       }

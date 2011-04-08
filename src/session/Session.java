@@ -3,6 +3,7 @@ package session;
 import groupMembership.Server;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -18,15 +19,14 @@ public class Session implements Serializable {
    private String sessionID;
    private Integer version;
    private Date timestamp;
-   private List<Server> locations;
-   private Hashtable<String, String> data;
+   private List<Server> locations = new ArrayList<Server>();
+   private Hashtable<String, String> data = new Hashtable<String, String>();
    
    public Session(String sessionID, List<Server> list) {
       this.setSessionID(sessionID);
       this.setLocations(list);
       this.version = 0;
       this.timestamp = new Date();
-      this.data = new Hashtable<String, String>();
    }
 
    public void setSessionID(String sessionID) {

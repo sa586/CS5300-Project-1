@@ -175,7 +175,13 @@ public class SessionManager {
           String[] parts = l.split(":");
           servers.add(new Server(parts[0],parts[1]));
         }
-        Session s = new Session(cookie_params[0], servers);
+        Session s = SessionManager.getSessionById(cookie_params[0], cookie_params[1]);
+        if (s != null){
+          s.setLocations(servers);
+          
+          return s;
+        }
+        s = new Session(cookie_params[0], servers);
         s.setVersion(Integer.valueOf(cookie_params[1]));
         Session session = RPCClient.get(s);
         if (session == null) {
