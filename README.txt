@@ -13,6 +13,15 @@
 4. If no server responds affirmatively, initialize a session and follow the new session flow
 5. Update session with new data, and issue put to servers in session. If there are less than NQ servers responding, add additional servers from the server list
 
+==Cookies
+Cookies contain the SessionID, Version and Locations of servers that contain that session.
+
+==RPC Messages
+RCP messages are a comma separated string sent over UDP to each other. They contain the CallID (a unique UUID), the operation code and the data corresponding to the operation.
+
+==SimpleDB
+We use SimpleDB to store lists of servers, keyed as IP-address:port. They also have fields for ip and port. The servers contact SimpleDB periodically to retrieve the latest list and to probe another server to check if that server is online.
+
 ==Structure
 The main webserver class is Project1 in the default package.
 The Startup class initializes the static variables in Project1. This is done when AWS does a health check on the instance, and starts the RPCServer and other threads.
